@@ -22,7 +22,7 @@
 
 This work bridges the gap between complex geotechnical knowledge graphs and domain-agnostic users by providing a conversational interface that requires no Cypher or SQL expertise.
 
-> **Co-authored by:** [Usama] & Muhammad Shoaib  
+> **Co-authored by:**  Usama Khalid  
 > Published in: *(citation forthcoming — see [Citation](#citation))*
 
 ---
@@ -252,7 +252,7 @@ TASK_TYPES = [
 | FAISS Vector Index (`.index`) | 📧 Available on request |
 | Voxel Embeddings (`.npy`) | 📧 Available on request |
 
-> For large files, contact: **[your.email@domain.com]**
+> For large files, contact: **usamakhalid@hanyang.ac.kr**
 
 ---
 
@@ -290,7 +290,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 | | |
 |---|---|
-| **Co-author (LLM / Core System)** | [your.email@domain.com] |
+| **Co-author (LLM / Core System)** | usamakhalid@hanyang.ac.kr |
 | **Co-author (Domain / Data)** | muhammadshoaib5308@gmail.com |
 
 ---
