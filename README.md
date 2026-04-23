@@ -1,105 +1,221 @@
 # VOXEL-GRAPH-VECTOR-RAG
 
-Natural Language Interface for Subsurface Digital Twins using Retrieval-Augmented Generation (RAG) and Large Language Models (LLMs).
+<div align="center">
 
-##  Overview
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![Neo4j](https://img.shields.io/badge/Neo4j-5.x-green.svg)
+![FAISS](https://img.shields.io/badge/FAISS-1.7.4-orange.svg)
+![LLM](https://img.shields.io/badge/LLM-GPT--4o%20%7C%20Claude-purple.svg)
 
-This system enables natural language querying, reasoning, and visualization of voxel-based subsurface digital twins. It integrates hybrid RAG (Graph + Vector search) with LLMs to automatically extract, fuse, and interpret spatially distributed underground semantics.
+**A Natural Language Interface for Subsurface Digital Twins using Hybrid RAG and Large Language Models**
 
-**Key Features:**
--  Natural language querying (no SQL/Cypher expertise required)
--  Hybrid RAG combining Neo4j graph traversal + FAISS vector search
--  Interactive 3D voxel-level visualization in Rhino
--  9 task types: Attribute retrieval, Filtering, Reasoning, Computation, Classification, Summarization, Comparison, Proximity, Visualization
+[Overview](#overview) • [Architecture](#architecture) • [Features](#features) • [Dataset](#evaluation-dataset) • [Setup](#setup) • [Usage](#usage) • [Citation](#citation) • [Contact](#contact)
 
-##  Repository Contents
+</div>
 
-### **1. Source Code**
-- `neo4j_connector.py` - Neo4j graph database operations
-- `faiss_manager.py` - FAISS vector search manager
-- `master_prompts.py` - task-specific prompt templates with anti-hallucination constraints (It can be modified and adopted for other tasks user defined)
-- `openai_helper.py` - OpenAI GPT integration (if you need other ai helper, please contact muhammadshoaib5308@gmail.com)
-- `neo4j_config.py` - Database and API configuration template
-- `rhino_highlighter.py` - 3D voxel highlighting in Rhino (only configuration with red highlighting is upload here. this can be modified for other scenario with more colors)
-- `voxel to voxel relationship calculator.py` - Graph relationship generator
-- `voxel_metadata.json` - Voxel metadata structure
+---
 
-### **2. Evaluation Dataset for response accuracy**
-- `Q&A_Dataset_400.xlsx` - **400 question-answer pairs** across 9 task categories
-  - Attribute Retrieval (50 queries, 12.5%)
-  - Filtering (40 queries, 10%)
-  - Reasoning (45 queries, 11.25%)
-  - Computation (40 queries, 10%)
-  - Classification (45 queries, 11.25%)
-  - Summarization (50 queries, 12.5%)
-  - Comparison (40 queries, 10%)
-  - Proximity (40 queries, 10%)
-  - Visualization (50 queries, 12.5%)
+## Overview
 
-### **3. Evaluation Dataset for routing accuracy**
-  - `Q&A_Dataset_200.xlsx` - **200 question-answer pairs** across 9 task categories
+**VOXEL-GRAPH-VECTOR-RAG** is a research system that enables **natural language querying, reasoning, and 3D visualization** of voxel-based subsurface digital twins. It combines a hybrid Retrieval-Augmented Generation (RAG) pipeline — fusing Neo4j graph traversal with FAISS dense vector search — with task-specific LLM prompting to interpret spatially distributed underground geological semantics.
 
-### **4. Ground Truth Data**
-- `Ground truth with 4 consistent layers.zip` - Ground truth model in RHino geometries
+This work bridges the gap between complex geotechnical knowledge graphs and domain-agnostic users by providing a conversational interface that requires no Cypher or SQL expertise.
 
-### **5. Neo4j Database**
-- `neo4j-2025-12-29T03-39-58.dump` - Complete Neo4j database dump (16,116 voxels with 50+ attributes each, this data can be used as a practice to demonstrate the developed system inside RHino3D)
+> **Co-authored by:** [Usama] & Muhammad Shoaib  
+> Published in: *(citation forthcoming — see [Citation](#citation))*
 
-## Quick Start
+---
 
-### **Prerequisites**
+## Architecture
+
+```
+User Query (Natural Language)
+        │
+        ▼
+┌───────────────────┐
+│   Query Router    │  ← Task Classification (9 types)
+└───────────────────┘
+        │
+        ▼
+┌──────────────────────────────────────┐
+│         Hybrid Retrieval Engine      │
+│  ┌────────────────┐  ┌────────────┐  │
+│  │  Neo4j Graph   │  │   FAISS    │  │
+│  │  (Traversal)   │  │  (Vector)  │  │
+│  └────────────────┘  └────────────┘  │
+└──────────────────────────────────────┘
+        │
+        ▼
+┌───────────────────────────┐
+│  Task-Specific Prompt     │  ← Anti-hallucination constraints
+│  Templates (9 types)      │
+└───────────────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│   LLM (GPT-4o)    │
+└───────────────────┘
+        │
+        ▼
+┌──────────────────────────────────┐
+│  Natural Language Answer         │
+│  + Structured Voxel IDs          │
+└──────────────────────────────────┘
+        │
+        ▼
+┌───────────────────────────┐
+│  3D Visualization (Rhino) │
+└───────────────────────────┘
+```
+
+---
+
+## Features
+
+| Capability | Description |
+|---|---|
+| **Natural Language Querying** | Conversational access to geotechnical data — no Cypher or SQL required |
+| **Hybrid RAG** | Fuses Neo4j knowledge graph traversal with FAISS dense vector retrieval |
+| **9 Task Types** | Attribute Retrieval, Filtering, Reasoning, Computation, Classification, Summarization, Comparison, Proximity, Visualization |
+| **Anti-Hallucination Prompting** | Task-specific prompt templates with grounding constraints |
+| **3D Voxel Visualization** | Real-time highlighting of result voxels inside Rhino 3D |
+| **LLM-Agnostic** | Modular design supports GPT-4o, Claude, and other providers |
+| **Large-Scale Knowledge Graph** | 16,116 voxels with 50+ geotechnical attributes each |
+
+---
+
+## Repository Structure
+
+```
+VOXEL-GRAPH-VECTOR-RAG/
+│
+├── neo4j_connector.py                   # Neo4j graph database interface
+├── faiss_manager.py                     # FAISS vector index manager
+├── master_prompts.py                    # Task-specific prompt templates (9 types)
+├── openai_helper.py                     # LLM integration (OpenAI / extendable)
+├── neo4j_config.py                      # Configuration template (credentials, API keys)
+├── rhino_highlighter.py                 # 3D voxel highlighting in Rhino
+├── voxel to voxel relationship          
+│   calculator.py                        # Graph edge/relationship generator
+├── voxel_metadata.json                  # Voxel attribute schema
+│
+├── Q&A_Dataset_200.xlsx                 # 200 Q&A pairs for routing accuracy evaluation
+├── Q&A_Dataset_400.xlsx                 # 400 Q&A pairs for response accuracy evaluation
+├── Ground truth with 4                  
+│   consistent layers.zip                # Ground truth Rhino geometry model
+└── neo4j-2025-12-29T03-39-58.dump      # Full Neo4j database dump (16,116 voxels)
+```
+
+---
+
+## Evaluation Dataset
+
+Two benchmark datasets are provided for rigorous evaluation:
+
+### Q&A\_Dataset\_400.xlsx — Response Accuracy (400 queries)
+
+| Task Category | Count | Share |
+|---|---|---|
+| Attribute Retrieval | 50 | 12.5% |
+| Summarization | 50 | 12.5% |
+| Visualization | 50 | 12.5% |
+| Reasoning | 45 | 11.25% |
+| Classification | 45 | 11.25% |
+| Filtering | 40 | 10.0% |
+| Computation | 40 | 10.0% |
+| Comparison | 40 | 10.0% |
+| Proximity | 40 | 10.0% |
+
+### Q&A\_Dataset\_200.xlsx — Routing Accuracy (200 queries)
+
+Used specifically for evaluating the task classification / query routing module across the same 9 task types.
+
+---
+
+## Voxel Attribute Schema
+
+Each of the 16,116 voxels carries 50+ attributes across the following categories:
+
+| Category | Attributes |
+|---|---|
+| **Identification** | `voxel_id`, `project_id` |
+| **Material** | `material_type`, `soil_group`, `texture`, `color` |
+| **Spatial** | `position_x/y/z`, `elevation`, `depth_below_surface` |
+| **Geological** | `mass_id`, `top_surface_id`, `bottom_surface_id` |
+| **Physical** | `moisture_content`, `density`, `porosity`, `permeability` |
+| **Geotechnical Strength** | `bearing_capacity`, `spt_n_value`, `friction_angle`, `cohesion` |
+| **Risk Assessment** | `overall_risk_level`, `settlement_potential_mm`, `is_problematic` |
+| **Foundation** | `foundation_suitability`, `recommended_foundation_type`, `ground_improvement_needed` |
+
+---
+
+## Setup
+
+### Prerequisites
+
 - Python 3.8+
 - Neo4j Database 5.x
-- Rhino 3D 7/8 (for visualization)
-- API keys: OpenAI, Anthropic, etc. (We can use here OpenAI for demonstration. While, any AI model can be used and file should be prepared accordingly). 
+- Rhino 3D 7 or 8 (for visualization only)
+- API key: OpenAI (GPT-4o) or any compatible provider
 
-### **Installation**
+### Installation
+
 ```bash
-# Clone repository
-git clone https://github.com/MuhammadShoaib9/VOXEL-GRAPH-VECTOR-RAG.git
+# 1. Clone the repository
+git clone https://github.com/<YOUR_USERNAME>/VOXEL-GRAPH-VECTOR-RAG.git
 cd VOXEL-GRAPH-VECTOR-RAG
 
-# Install dependencies
+# 2. Install Python dependencies
 pip install neo4j==5.14.0 faiss-cpu==1.7.4 numpy pandas openai anthropic
 ```
 
-### **Configuration**
+### Neo4j Configuration
 
-1. **Configure Neo4j:**
-   - Install Neo4j Desktop from https://neo4j.com/download/
-   - Create new database
-   - Import database dump: `neo4j-2025-12-29T03-39-58.dump`
+1. Download and install [Neo4j Desktop](https://neo4j.com/download/)
+2. Create a new database project
+3. Import the provided dump: `neo4j-2025-12-29T03-39-58.dump`
+4. Start the database
 
-2. **Configure API Keys:**
-   - Open `neo4j_config.py`
-   - Replace placeholders with your credentials:
+### API & Database Credentials
+
+Edit `neo4j_config.py`:
+
 ```python
-   NEO4J_CONFIG = {
-       'uri': 'bolt://localhost:7687',
-       'user': 'neo4j',
-       'password': 'Voxelpass123',   # this can be used for my created database for demonstration. 
-       'database': 'neo4j'
-   }
-   
-   OPENAI_CONFIG = {
-       'api_key': 'YOUR_OPENAI_API_KEY_HERE'  # Replace this with your open_Ai key
-   }
+NEO4J_CONFIG = {
+    'uri': 'bolt://localhost:7687',
+    'user': 'neo4j',
+    'password': 'YOUR_NEO4J_PASSWORD',
+    'database': 'neo4j'
+}
+
+OPENAI_CONFIG = {
+    'api_key': 'YOUR_OPENAI_API_KEY'
+}
 ```
 
-### **Basic Usage**
+> ⚠️ **Security note:** Never commit real credentials to version control. Use `.env` files or environment variables in production.
+
+---
+
+## Usage
+
+### Basic Query Example
+
 ```python
 from neo4j_connector import Neo4jConnector
 from openai_helper import OpenAIHelper
 from faiss_manager import FAISSManager
 
 # Initialize components
-neo4j = Neo4jConnector(uri="bolt://localhost:7687", 
-                       user="neo4j", 
-                       password="your_password")
-
+neo4j = Neo4jConnector(
+    uri="bolt://localhost:7687",
+    user="neo4j",
+    password="your_password"
+)
 gpt = OpenAIHelper(api_key="your_openai_key")
 
-# Query example
+# Run a filtering query
 question = "Find voxels with high moisture content in layer M3"
 voxels = neo4j.get_high_moisture_voxels_with_count(threshold=40.0)
 answer = gpt.generate_answer(question, voxels['voxels'], 'FILTERING')
@@ -107,64 +223,78 @@ answer = gpt.generate_answer(question, voxels['voxels'], 'FILTERING')
 print(answer['answer'])
 ```
 
-## 📦 Project Data Files
+### Supported Task Types
 
-Some of the file needed for demonstration are upload. While some large files are **available upon request** via email:
-
-- **Rhino 3D Voxel Model** (.3dm file, uploaded)
-- **Neo4j Knowledge Graph** (complete database, uploaded)
-- **FAISS Vector Index** (.index file, request via email)
-- **Voxel Embeddings** (.npy file, request via email)
-- **Complete Metadata** (.json file, uploaded)
-
-📧 **Contact:** muhammadshoaib5308@gmail.com
-
-
-## 🏗️ System Architecture
-```
-User Query (Natural Language)
-    ↓
-Query Router (Task Classification)
-    ↓
-Hybrid Retrieval ← Neo4j Graph + FAISS Vector Search
-    ↓
-Task-Specific Prompt Template (9 types)
-    ↓
-LLM (GPT-4o)
-    ↓
-Natural Language Answer + Voxel IDs
-    ↓
-3D Visualization in Rhino
+```python
+TASK_TYPES = [
+    'ATTRIBUTE_RETRIEVAL',  # Retrieve specific voxel attribute values
+    'FILTERING',            # Filter voxels by conditions
+    'REASONING',            # Multi-step spatial/geotechnical reasoning
+    'COMPUTATION',          # Aggregate calculations (mean, sum, etc.)
+    'CLASSIFICATION',       # Classify voxels by material/risk type
+    'SUMMARIZATION',        # Summarize regions or layers
+    'COMPARISON',           # Compare two or more voxel groups
+    'PROXIMITY',            # Spatial proximity queries
+    'VISUALIZATION'         # Return voxel IDs for 3D highlighting in Rhino
+]
 ```
 
-## 📚 Voxel Attribute Schema for the upload demostration example
+---
 
-Each voxel contains comprehensive geotechnical properties:
+## Data Availability
 
-**Identification:** voxel_id, project_id
+| Asset | Status |
+|---|---|
+| Source code (all `.py` files) | ✅ Available in this repository |
+| Q&A Evaluation Datasets (`.xlsx`) | ✅ Available in this repository |
+| Ground Truth Rhino Geometry (`.3dm`) | ✅ Available in this repository |
+| Neo4j Database Dump (`.dump`) | ✅ Available in this repository |
+| FAISS Vector Index (`.index`) | 📧 Available on request |
+| Voxel Embeddings (`.npy`) | 📧 Available on request |
 
-**Material:** material_type, soil_group, texture, color
+> For large files, contact: **[your.email@domain.com]**
 
-**Position:** position_x/y/z, elevation, depth_below_surface
+---
 
-**Geological:** mass_id, top_surface_id, bottom_surface_id
+## Citation
 
-**Physical:** moisture_content, density, porosity, permeability
+> 📌 **Paper details will be added upon publication. Please check back or watch this repository.**
 
-**Strength:** bearing_capacity, spt_n_value, friction_angle, cohesion
+If you use this codebase, dataset, or methodology in your research, please cite:
 
-**Risk Assessment:** overall_risk_level, settlement_potential_mm, is_problematic
+```bibtex
+@article{VOXELGRAPHRAG2025,
+  title     = {[Title to be added]},
+  author    = {[Author names to be added]},
+  journal   = {[Venue to be added]},
+  year      = {2025},
+  url       = {[URL to be added]}
+}
+```
 
-**Foundation:** foundation_suitability, recommended_foundation_type, ground_improvement_needed
+---
 
+## Contributing
 
-## 🤝 Contributing
+Contributions, issues, and pull requests are welcome. For major changes, please open an issue first to discuss the proposed modification.
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).
 
+---
 
-Special thanks to all contributors and domain experts who participated in the evaluation.
+## Contact
+
+| | |
+|---|---|
+| **Co-author (LLM / Core System)** | [your.email@domain.com] |
+| **Co-author (Domain / Data)** | muhammadshoaib5308@gmail.com |
+
+---
+
+<div align="center">
+<sub>Built with Neo4j · FAISS · OpenAI GPT-4o · Rhino 3D</sub>
+</div>
